@@ -1,0 +1,143 @@
+/* ========================================
+   银河星空背景效果 - 简化稳定版
+   ======================================== */
+
+.starry-sky {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #0a0a1a 0%, #050510 50%, #020208 100%);
+}
+
+/* 星云层 - 简化 */
+.nebula-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.nebula {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.nebula-1 {
+  top: 10%;
+  left: 20%;
+  width: 400px;
+  height: 300px;
+  background: radial-gradient(ellipse, rgba(100, 60, 150, 0.15) 0%, transparent 70%);
+}
+
+.nebula-2 {
+  top: 50%;
+  right: 10%;
+  width: 350px;
+  height: 250px;
+  background: radial-gradient(ellipse, rgba(60, 100, 180, 0.12) 0%, transparent 70%);
+}
+
+.nebula-3 {
+  bottom: 20%;
+  left: 30%;
+  width: 300px;
+  height: 200px;
+  background: radial-gradient(ellipse, rgba(80, 40, 120, 0.1) 0%, transparent 70%);
+}
+
+/* 银河光带 */
+.milky-way {
+  position: absolute;
+  top: 10%;
+  left: -30%;
+  width: 160%;
+  height: 80%;
+  background: linear-gradient(
+    165deg,
+    transparent 0%,
+    rgba(100, 80, 180, 0.03) 15%,
+    rgba(80, 100, 200, 0.05) 25%,
+    rgba(100, 120, 220, 0.06) 35%,
+    transparent 50%
+  );
+  transform: rotate(-15deg);
+}
+
+/* 星星层 */
+.stars-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.star {
+  position: absolute;
+  background: rgb(255, 255, 255);
+  border-radius: 50%;
+  animation: starTwinkle var(--duration, 3s) ease-in-out infinite;
+  box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.4);
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: var(--star-opacity, 0.7); transform: scale(1.1); }
+}
+
+/* 亮星层 */
+.bright-stars-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.bright-star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: hsl(var(--star-hue, 200), 100%, 90%);
+  border-radius: 50%;
+  animation: brightStarPulse 3s ease-in-out infinite;
+  box-shadow:
+    0 0 6px 2px rgba(255, 255, 255, 0.7),
+    0 0 12px 4px hsla(var(--star-hue, 200), 80%, 70%, 0.3);
+}
+
+@keyframes brightStarPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* 流星层 */
+.shooting-stars-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.shooting-star-new {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 30%, white 100%);
+  border-radius: 50%;
+  animation: shootingStarAnim 4s ease-out infinite;
+  transform-origin: right center;
+}
+
+@keyframes shootingStarAnim {
+  0% { opacity: 0; transform: translateX(0) translateY(0) rotate(-45deg) scale(0.3); }
+  5% { opacity: 1; transform: translateX(-80px) translateY(80px) rotate(-45deg) scale(0.8); }
+  15% { opacity: 1; transform: translateX(-300px) translateY(300px) rotate(-45deg) scale(1); }
+  20% { opacity: 0; transform: translateX(-400px) translateY(400px) rotate(-45deg) scale(0.5); }
+  100% { opacity: 0; }
+}
+
+/* 底部渐变 */
+.sky-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  background: linear-gradient(to top, #0a0a1a 0%, rgba(10, 10, 26, 0.6) 40%, transparent 100%);
+  pointer-events: none;
+}
