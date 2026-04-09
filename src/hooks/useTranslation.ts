@@ -32,7 +32,7 @@ export const translations: Record<'zh' | 'en', Translations> = {
     tooltip: { settings: '设置', pathConfig: '配置 SAP 路径', import: '导入连接', export: '导出连接', lightTheme: '浅色主题', darkTheme: '深色主题', add: '新建连接' },
     group: { title: '分组管理', new: '新建分组', rename: '重命名', delete: '删除', noGroup: '未分组', expand: '展开', collapse: '折叠' },
     batch: { selectAll: '全选', deselectAll: '取消全选', launch: '批量启动', delete: '批量删除', selected: '已选择 {count} 项' },
-    recent: { title: '最近使用', frequently: '经常使用', clear: '清空记录' }
+    recent: { title: '最近使用', frequently: '经常使用', clear: '清空记录' },
   },
   en: {
     title: 'SAP Quick Launcher',
@@ -65,6 +65,6 @@ export const translations: Record<'zh' | 'en', Translations> = {
     tooltip: { settings: 'Settings', pathConfig: 'Configure SAP Path', import: 'Import Connections', export: 'Export Connections', lightTheme: 'Light Theme', darkTheme: 'Dark Theme', add: 'New Connection' },
     group: { title: 'Groups', new: 'New Group', rename: 'Rename', delete: 'Delete', noGroup: 'Ungrouped', expand: 'Expand', collapse: 'Collapse' },
     batch: { selectAll: 'Select All', deselectAll: 'Deselect All', launch: 'Batch Launch', delete: 'Batch Delete', selected: '{count} selected' },
-    recent: { title: 'Recent', frequently: 'Frequently Used', clear: 'Clear History' }
+    recent: { title: 'Recent', frequently: 'Frequently Used', clear: 'Clear History' },
   }
 };

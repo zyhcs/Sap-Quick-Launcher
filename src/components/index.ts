@@ -11,7 +11,6 @@ export { default as Particles } from './Particles';
 export { default as SettingsModal } from './SettingsModal';
 export type { Settings as AppSettings, BgEffect } from './SettingsModal';
 export { default as Tooltip } from './Tooltip';
-export { default as ActivationModal } from './ActivationModal';
 export { default as OnboardingTour } from './OnboardingTour';
 export { default as NebulaCanvas } from './NebulaCanvas';
 export { default as StarfieldCanvas } from './StarfieldCanvas';

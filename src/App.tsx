@@ -16,7 +16,6 @@ import {
   EmptyState,
   Particles,
   SettingsModal,
-  ActivationModal,
   OnboardingTour,
   NebulaCanvas,
   StarfieldCanvas,
@@ -106,10 +105,6 @@ export default function App() {
     })
   );
 
-  // 激活状态
-  const [activated, setActivated] = useState<boolean | null>(null); // null = 检查中
-  const [machineCode, setMachineCode] = useState('');
-
   // 新手引导
   const [showTour, setShowTour] = useState(false);
   const TOUR_DONE_KEY = 'sap-launcher-tour-done';
@@ -123,25 +118,6 @@ export default function App() {
   const [typeLines, setTypeLines] = useState<string[]>([]);       // 已显示完整的行
   const [typingLine, setTypingLine] = useState('');               // 正在打字的当前行
   const [typingDone, setTypingDone] = useState(false);            // 所有行是否打完
-
-  // 检查激活状态
-  useEffect(() => {
-    (async () => {
-      try {
-        const [licenseResult, mc] = await Promise.all([
-          invoke<{ activated: boolean; expiry: string }>('check_license'),
-          invoke<string>('get_machine_code'),
-        ]);
-        setMachineCode(mc);
-        setActivated(licenseResult.activated);
-      } catch {
-        setActivated(false);
-        setMachineCode('');
-      }
-    })();
-  }, []);
-
-
 
   // 初始化主题和数据 - 从 Store 加载
   useEffect(() => {
@@ -749,33 +725,10 @@ export default function App() {
     setToast(lang === 'zh' ? '已移动到分组' : 'Moved to group');
   };
 
-
-  // 激活检查：未激活时显示激活弹窗，覆盖整个应用
-  if (activated === null) {
-    // 检查中：显示纯色背景，避免闪烁
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${
-        theme === 'dark' ? 'bg-[#1E2532]' : 'bg-[#E8EEF4]'
-      }`}>
-        <div className="w-6 h-6 border-2 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen h-screen w-screen flex justify-center items-center relative overflow-hidden">
-      {/* 激活弹窗 - 覆盖在最顶层 */}
-      {!activated && (
-        <ActivationModal
-          theme={theme}
-          lang={lang}
-          machineCode={machineCode}
-          onActivated={() => setActivated(true)}
-        />
-      )}
-
       {/* 新手引导 */}
-      {activated && showTour && (
+      {showTour && (
         <OnboardingTour
           theme={theme}
           lang={lang}

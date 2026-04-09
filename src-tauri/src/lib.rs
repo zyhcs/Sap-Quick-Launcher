@@ -4,176 +4,8 @@ use tauri::{
 };
 use tauri::Theme;
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
-use hmac::{Hmac, Mac};
-use sha2::Sha256;
-
-// ==================== 激活码系统 ====================
-// 密钥：你保管这个值，激活码生成工具也用同一个值
-// 如需更换密钥，重新编译即可，旧激活码自动失效
-const LICENSE_SECRET: &str = "SAP-QUICK-LAUNCHER-SECRET-2026-BY-AUTHOR";
-
-type HmacSha256 = Hmac<Sha256>;
-
-/// 从 Windows 注册表获取机器唯一标识符（使用 winreg API，不调用外部进程）
-fn get_machine_id() -> String {
-    #[cfg(target_os = "windows")]
-    {
-        use winreg::enums::{HKEY_LOCAL_MACHINE, KEY_READ};
-        use winreg::RegKey;
-        let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-        if let Ok(subkey) = hklm.open_subkey_with_flags(
-            "SOFTWARE\\Microsoft\\Cryptography",
-            KEY_READ,
-        ) {
-            if let Ok(guid) = subkey.get_value::<String, _>("MachineGuid") {
-                return guid.to_uppercase();
-            }
-        }
-    }
-    // 降级：返回固定字符串（非 Windows 平台）
-    "UNKNOWN-MACHINE".to_string()
-}
-
-/// 根据机器码（可选）和到期日生成激活码
-/// payload = machine_id + "|" + expiry  (expiry 格式: "20261231" 或 "PERMANENT")
-fn compute_license_code(machine_id: &str, expiry: &str) -> String {
-    let payload = format!("{}|{}", machine_id, expiry);
-    let mut mac = HmacSha256::new_from_slice(LICENSE_SECRET.as_bytes())
-        .expect("HMAC can take key of any size");
-    mac.update(payload.as_bytes());
-    let result = mac.finalize().into_bytes();
-    // 取前 8 字节 = 16 个十六进制字符，分成 4 组
-    let h = hex::encode(&result[..8]).to_uppercase();
-    format!("SAP-{}-{}-{}-{}", &h[0..4], &h[4..8], &h[8..12], &h[12..16])
-}
-
-/// 验证激活码
-/// 返回 Ok(expiry_info) 或 Err(reason)
-fn verify_license_code(code: &str, machine_id: &str, expiry: &str) -> Result<String, String> {
-    let expected = compute_license_code(machine_id, expiry);
-    if code.trim().to_uppercase() == expected {
-        Ok(expiry.to_string())
-    } else {
-        Err("激活码无效".to_string())
-    }
-}
 
 // ==================== Tauri Commands ====================
-
-/// 前端调用：获取本机机器码（用于告知用户，让其发给你以生成激活码）
-#[tauri::command]
-fn get_machine_code() -> String {
-    get_machine_id()
-}
-
-/// 前端调用：激活软件
-/// code: 用户输入的激活码
-/// expiry: 到期日（"PERMANENT" 或 "20261231" 格式），激活码生成时指定
-///   但注意：expiry 不应由用户自由输入——激活码本身已编码了 expiry，
-///   所以我们尝试几个常见 expiry 值（包括 PERMANENT 和未来5年）来自动匹配
-#[tauri::command]
-fn activate_license(code: String) -> Result<String, String> {
-    let machine_id = get_machine_id();
-    let code_upper = code.trim().to_uppercase();
-
-    // 尝试 PERMANENT
-    if verify_license_code(&code_upper, &machine_id, "PERMANENT").is_ok() {
-        save_license(&code_upper, "PERMANENT")?;
-        return Ok("PERMANENT".to_string());
-    }
-
-    // 尝试 SITE_LICENSE（不绑定机器码的网站授权）
-    if verify_license_code(&code_upper, "SITE", "PERMANENT").is_ok() {
-        save_license(&code_upper, "PERMANENT")?;
-        return Ok("PERMANENT".to_string());
-    }
-
-    // 尝试未来5年内所有年份的年底到期日
-    let current_year = 2026u32;
-    for y in current_year..=(current_year + 5) {
-        for expiry in &[
-            format!("{}1231", y),
-            format!("{}0630", y),
-            format!("{}0331", y),
-            format!("{}0930", y),
-        ] {
-            if verify_license_code(&code_upper, &machine_id, expiry).is_ok() {
-                save_license(&code_upper, expiry)?;
-                return Ok(expiry.clone());
-            }
-            // 也尝试 SITE 授权
-            if verify_license_code(&code_upper, "SITE", expiry).is_ok() {
-                save_license(&code_upper, expiry)?;
-                return Ok(expiry.clone());
-            }
-        }
-    }
-
-    Err("激活码无效或不匹配当前设备".to_string())
-}
-
-/// 保存激活信息到本地
-fn save_license(code: &str, expiry: &str) -> Result<(), String> {
-    use std::fs;
-    let config_dir = dirs::config_dir()
-        .unwrap_or_else(|| std::path::PathBuf::from("."))
-        .join("sap-quick-launcher");
-    fs::create_dir_all(&config_dir).map_err(|e| e.to_string())?;
-    let data = serde_json::json!({ "code": code, "expiry": expiry });
-    fs::write(config_dir.join("license.json"), data.to_string()).map_err(|e| e.to_string())?;
-    log::info!("License saved, expiry: {}", expiry);
-    Ok(())
-}
-
-/// 检查当前激活状态，返回 { activated: bool, expiry: string }
-#[tauri::command]
-fn check_license() -> serde_json::Value {
-    use std::fs;
-    let config_path = dirs::config_dir()
-        .unwrap_or_else(|| std::path::PathBuf::from("."))
-        .join("sap-quick-launcher")
-        .join("license.json");
-
-    if let Ok(data) = fs::read_to_string(&config_path) {
-        if let Ok(json) = serde_json::from_str::<serde_json::Value>(&data) {
-            let code = json.get("code").and_then(|v| v.as_str()).unwrap_or("").to_string();
-            let expiry = json.get("expiry").and_then(|v| v.as_str()).unwrap_or("").to_string();
-
-            if !code.is_empty() && !expiry.is_empty() {
-                let machine_id = get_machine_id();
-                // 验证已保存的激活码是否仍然有效
-                let valid_machine = verify_license_code(&code, &machine_id, &expiry).is_ok();
-                let valid_site = verify_license_code(&code, "SITE", &expiry).is_ok();
-                if valid_machine || valid_site {
-                    // 检查到期日
-                    if expiry == "PERMANENT" {
-                        return serde_json::json!({ "activated": true, "expiry": "永久授权" });
-                    }
-                    // 解析 YYYYMMDD
-                    if expiry.len() == 8 {
-                        let y: u32 = expiry[0..4].parse().unwrap_or(0);
-                        let m: u32 = expiry[4..6].parse().unwrap_or(0);
-                        let d: u32 = expiry[6..8].parse().unwrap_or(0);
-                        // 简单判断是否已过期（用当前年份 2026 比较）
-                        let now_ymd: u32 = 20260000 + 330; // 约 2026-03-30
-                        let expiry_ymd = y * 10000 + m * 100 + d;
-                        if expiry_ymd >= now_ymd {
-                            return serde_json::json!({
-                                "activated": true,
-                                "expiry": format!("{}-{}-{}", &expiry[0..4], &expiry[4..6], &expiry[6..8])
-                            });
-                        } else {
-                            return serde_json::json!({ "activated": false, "expiry": "已过期" });
-                        }
-                    }
-                }
-            }
-        }
-    }
-    serde_json::json!({ "activated": false, "expiry": "" })
-}
-
-// ==================== 原有功能命令 ====================
 
 #[tauri::command]
 fn launch_sap(
@@ -291,7 +123,7 @@ fn check_hotkey_available(app: tauri::AppHandle, hotkey: String) -> Result<bool,
     
     // 尝试注册一个临时快捷键来检测是否冲突
     // 如果注册失败，说明快捷键被占用
-    let test_id = format!("test_{}", hotkey.replace("+", "_"));
+    let _test_id = format!("test_{}", hotkey.replace("+", "_"));
     
     // 先检查当前是否已注册
     let global_shortcut = app.global_shortcut();
@@ -542,7 +374,6 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             launch_sap, export_connections, import_connections,
             set_window_theme, save_hotkey_config,
-            get_machine_code, activate_license, check_license,
             check_hotkey_available, restart_app
         ])
         .setup(|app| {
