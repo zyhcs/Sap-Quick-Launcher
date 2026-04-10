@@ -24,7 +24,7 @@ import {
   GroupManageModal,
 } from './components';
 import type { BgEffect } from './components';
-import { MagnifyingGlass, Copy, SortAscending, FolderSimple, DotsThree, CheckSquare, Square, Rocket, Trash, X, PencilSimple } from '@phosphor-icons/react';
+import { MagnifyingGlass, Copy, SortAscending, FolderSimple, DotsThree, CheckSquare, Square, Rocket, Trash, X, PencilSimple, PushPin } from '@phosphor-icons/react';
 import {
   DndContext,
   closestCenter,
@@ -139,6 +139,7 @@ export default function App() {
             order: c.order ?? idx,
             lastUsed: c.lastUsed ?? 0,
             useCount: c.useCount ?? 0,
+            pinned: c.pinned ?? false,
           }));
           // 按 order 排序
           connsWithOrder.sort((a, b) => a.order - b.order);
@@ -725,6 +726,19 @@ export default function App() {
     setToast(lang === 'zh' ? '已移动到分组' : 'Moved to group');
   };
 
+  // 固定/取消固定连接
+  const togglePin = (connId: string) => {
+    const conn = connections.find(c => c.id === connId);
+    const newPinned = !(conn?.pinned);
+    const newConnections = connections.map(c =>
+      c.id === connId ? { ...c, pinned: newPinned } : c
+    );
+    setConnections(newConnections);
+    saveConnections(newConnections);
+    setContextMenu(null);
+    setToast(newPinned ? t.toast.pinned : t.toast.unpinned);
+  };
+
   return (
     <div className="min-h-screen h-screen w-screen flex justify-center items-center relative overflow-hidden">
       {/* 新手引导 */}
@@ -906,10 +920,13 @@ export default function App() {
             }
 
             // 最近使用的连接（仅在没有搜索时显示）
-            const recentConns = searchQuery.trim() ? [] : recentConnections
-              .map(id => connections.find(c => c.id === id))
+            // 固定的卡片始终排在前面，不受使用频次影响
+            const pinnedConns = searchQuery.trim() ? [] : connections.filter(c => c.pinned);
+            const recentNonPinned = searchQuery.trim() ? [] : recentConnections
+              .map(id => connections.find(c => c.id === id && !c.pinned))
               .filter((c): c is Connection => c !== undefined)
-              .slice(0, 5);
+              .slice(0, 5 - pinnedConns.length);
+            const recentConns = [...pinnedConns, ...recentNonPinned].slice(0, 5);
 
             // 按分组整理连接
             const groupedConns = new Map<string | undefined, Connection[]>();
@@ -1212,6 +1229,19 @@ export default function App() {
             >
               <Copy size={16} className="text-emerald-400" />
               {t.actions.duplicate}
+            </button>
+
+            {/* 固定/取消固定 */}
+            <button
+              onClick={() => togglePin(contextMenu.conn.id)}
+              className={`w-full px-4 py-2 text-sm text-left flex items-center gap-2 transition-colors ${
+                theme === 'dark'
+                  ? 'text-white/80 hover:text-white hover:bg-white/10'
+                  : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              <PushPin size={16} className={contextMenu.conn.pinned ? 'text-cyan-400' : (theme === 'dark' ? 'text-white/40' : 'text-gray-400')} weight={contextMenu.conn.pinned ? 'fill' : 'regular'} />
+              {contextMenu.conn.pinned ? t.actions.unpin : t.actions.pin}
             </button>
 
             {/* 移动到分组子菜单 */}

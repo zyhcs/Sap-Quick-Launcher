@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAP Quick Launcher - 使用文档</title>
+  <meta name="description" content="SAP Quick Launcher 使用文档，包含安装、配置、功能说明等完整指南">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #22C55E;
+      --primary-glow: rgba(34, 197, 94, 0.5);
+      --cyan: #06B6D4;
+      --cyan-glow: rgba(6, 182, 212, 0.5);
+      --purple: #8B5CF6;
+      --purple-glow: rgba(139, 92, 246, 0.5);
+      --bg-dark: #050507;
+      --bg-card: #0C0C10;
+      --bg-card-hover: #14141A;
+      --text-primary: #FAFAFA;
+      --text-secondary: #A1A1AA;
+      --text-muted: #71717A;
+      --border: rgba(255, 255, 255, 0.06);
+      --gradient-1: linear-gradient(135deg, #22C55E 0%, #06B6D4 100%);
+      --gradient-2: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+      --gradient-3: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* 自定义光标 */
+    .cursor {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 10000;
+      transition: transform 0.1s ease, background 0.2s ease;
+      mix-blend-mode: difference;
+    }
+
+    .cursor-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--primary);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 10001;
+    }
+
+    .cursor.hover {
+      transform: scale(2);
+      background: rgba(34, 197, 94, 0.2);
+    }
+
+    /* 网格背景 */
+    .grid-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        linear-gradient(rgba(34, 197, 94, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 197, 94, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* 渐变光晕 */
+    .glow-orbs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: orbFloat 20s ease-in-out infinite;
+    }
+
+    .glow-orb.green {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+      top: -10%;
+      left: 10%;
+    }
+
+    .glow-orb.cyan {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+      bottom: 20%;
+      right: 5%;
+      animation-delay: -7s;
+    }
+
+    .glow-orb.purple {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, var(--purple-glow) 0%, transparent 70%);
+      top: 40%;
+      left: 50%;
+      animation-delay: -14s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(30px, -20px) scale(1.1); }
+      50% { transform: translate(-20px, 30px) scale(0.9); }
+      75% { transform: translate(20px, 20px) scale(1.05); }
+    }
+
+    /* 导航栏 */
+    .navbar {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 100;
+      padding: 1rem 2rem;
+      background: rgba(12, 12, 16, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .navbar-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--gradient-1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: white;
+      box-shadow: 0 0 30px var(--primary-glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo-icon::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+      animation: logoShine 3s ease-in-out infinite;
+    }
+
+    @keyframes logoShine {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gradient-1);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: var(--gradient-1);
+      color: white;
+      box-shadow: 0 0 30px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 40px var(--primary-glow);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+    }
+
+    /* 文档主体布局 */
+    .docs-page {
+      position: relative;
+      z-index: 10;
+      padding: 8rem 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* 文档头部 */
+    .docs-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .docs-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .docs-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+
+    .docs-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .docs-title .gradient-text {
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .docs-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* 快速导航 */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 4rem;
+    }
+
+    .quick-nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .quick-nav a:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+    }
+
+    .quick-nav a .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* 文档内容 */
+    .docs-content {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    /* 文档卡片 */
+    .doc-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .doc-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-1);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .doc-section:hover {
+      border-color: rgba(34, 197, 94, 0.3);
+      box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.5);
+    }
+
+    .doc-section:hover::before {
+      opacity: 1;
+    }
+
+    .section-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-icon.green {
+      background: rgba(34, 197, 94, 0.1);
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+    }
+
+    .section-icon.cyan {
+      background: rgba(6, 182, 212, 0.1);
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.2);
+    }
+
+    .section-icon.purple {
+      background: rgba(139, 92, 246, 0.1);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+    }
+
+    .section-icon.blue {
+      background: rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+    }
+
+    .section-icon.orange {
+      background: rgba(249, 115, 22, 0.1);
+      box-shadow: 0 0 30px rgba(249, 115, 22, 0.2);
+    }
+
+    .section-icon.pink {
+      background: rgba(236, 72, 153, 0.1);
+      box-shadow: 0 0 30px rgba(236, 72, 153, 0.2);
+    }
+
+    .section-icon.red {
+      background: rgba(239, 68, 68, 0.1);
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+    }
+
+    .section-icon.amber {
+      background: rgba(245, 158, 11, 0.1);
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title .anchor {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .section-title:hover .anchor {
+      opacity: 1;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+
+    /* 步骤列表 */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .step-item:hover {
+      border-color: rgba(34, 197, 94, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 10px;
+      background: var(--gradient-1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: white;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary);
+    }
+
+    .step-content p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    /* 键盘快捷键标签 */
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: var(--text-primary);
+    }
+
+    /* 功能列表 */
+    .feature-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .feature-item:hover {
+      border-color: rgba(34, 197, 94, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .feature-item .icon {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .feature-item .text {
+      flex: 1;
+    }
+
+    .feature-item .text strong {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .feature-item .text p {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    /* 环境色标签 */
+    .env-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .env-tag.prd {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+    }
+
+    .env-tag.qas {
+      background: rgba(245, 158, 11, 0.15);
+      color: #F59E0B;
+    }
+
+    .env-tag.dev {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22C55E;
+    }
+
+    /* 提示框 */
+    .tip-box {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-radius: 14px;
+      margin-top: 1rem;
+    }
+
+    .tip-box.info {
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+    }
+
+    .tip-box.warning {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .tip-box.success {
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .tip-box .tip-icon {
+      font-size: 1.2rem;
+      line-height: 1.5;
+    }
+
+    .tip-box .tip-text {
+      flex: 1;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .tip-box .tip-text strong {
+      color: var(--text-primary);
+    }
+
+    /* 两栏布局 */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .col-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .col-card h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .col-card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .col-card ul li {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      padding-left: 1rem;
+      position: relative;
+    }
+
+    .col-card ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.55rem;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    /* 代码块 */
+    .code-block {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+
+    .code-block .comment {
+      color: var(--text-muted);
+    }
+
+    .code-block .keyword {
+      color: var(--purple);
+    }
+
+    .code-block .string {
+      color: var(--primary);
+    }
+
+    /* Footer */
+    .footer {
+      position: relative;
+      z-index: 10;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+      margin-top: 4rem;
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-text {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    /* 滚动显示动画 */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 响应式 */
+    @media (max-width: 1024px) {
+      .docs-title {
+        font-size: 2.75rem;
+      }
+
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .docs-title {
+        font-size: 2rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .doc-section {
+        padding: 1.75rem;
+      }
+
+      .quick-nav {
+        gap: 0.5rem;
+      }
+    }
+
+    /* 减少动画 */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 自定义光标 -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-dot" id="cursor-dot"></div>
+
+  <!-- 网格背景 -->
+  <div class="grid-bg"></div>
+
+  <!-- 渐变光晕 -->
+  <div class="glow-orbs">
+    <div class="glow-orb green"></div>
+    <div class="glow-orb cyan"></div>
+    <div class="glow-orb purple"></div>
+  </div>
+
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">S</div>
+        <span>SAP Quick Launcher</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="#install">安装</a>
+        <a href="#features">功能</a>
+        <a href="#faq">常见问题</a>
+        <a href="index.html" class="btn btn-primary">
+          <span>立即下载</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 文档页面 -->
+  <div class="docs-page">
+    <!-- 文档头部 -->
+    <div class="docs-header reveal">
+      <div class="docs-badge">v1.0 使用文档</div>
+      <h1 class="docs-title">
+        快速上手 <span class="gradient-text">SAP Quick Launcher</span>
+      </h1>
+      <p class="docs-subtitle">
+        从安装到精通，完整的功能说明与操作指南。所有数据本地存储，安全可靠。
+      </p>
+    </div>
+
+    <!-- 快速导航 -->
+    <div class="quick-nav reveal">
+      <a href="#install">
+        <span class="nav-icon">📦</span> 安装配置
+      </a>
+      <a href="#connection">
+        <span class="nav-icon">🔗</span> 连接管理
+      </a>
+      <a href="#launch">
+        <span class="nav-icon">🚀</span> 启动连接
+      </a>
+      <a href="#env">
+        <span class="nav-icon">🏷️</span> 环境区分
+      </a>
+      <a href="#group">
+        <span class="nav-icon">📁</span> 分组管理
+      </a>
+      <a href="#pin">
+        <span class="nav-icon">📌</span> 固定卡片
+      </a>
+      <a href="#shortcut">
+        <span class="nav-icon">⌨️</span> 快捷键
+      </a>
+      <a href="#theme">
+        <span class="nav-icon">🎨</span> 主题与语言
+      </a>
+      <a href="#import-export">
+        <span class="nav-icon">💾</span> 导入导出
+      </a>
+      <a href="#faq">
+        <span class="nav-icon">❓</span> 常见问题
+      </a>
+    </div>
+
+    <!-- 文档内容 -->
+    <div class="docs-content">
+
+      <!-- 安装配置 -->
+      <div class="doc-section reveal" id="install">
+        <div class="section-icon green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          安装与配置
+          <a href="#install" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          SAP Quick Launcher 是一款 Windows 桌面应用，安装过程简洁快速。首次使用需要配置 SAP 快捷方式路径。
+        </p>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <strong>下载安装包</strong>
+              <p>从官网下载 Windows 安装包（支持 MSI 和 EXE 两种格式），双击运行安装程序</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <strong>配置 SAP 路径</strong>
+              <p>首次启动后，点击右上角 <kbd>⚙️</kbd> 设置按钮 → 选择「配置 SAP 路径」，指定 <code>sapshcut.exe</code> 的完整路径。通常位于 SAP GUI 安装目录下</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <strong>开始使用</strong>
+              <p>路径配置成功后，即可新建 SAP 连接并一键启动</p>
+            </div>
+          </div>
+        </div>
+        <div class="tip-box info">
+          <span class="tip-icon">💡</span>
+          <div class="tip-text">
+            <strong>sapshcut.exe 路径示例：</strong><code>C:\Program Files (x86)\SAP\FrontEnd\SAPGUI\sapshcut.exe</code>。如果未安装 SAP GUI，请先安装 SAP GUI for Windows。
+          </div>
+        </div>
+      </div>
+
+      <!-- 连接管理 -->
+      <div class="doc-section reveal" id="connection">
+        <div class="section-icon cyan">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          连接管理
+          <a href="#connection" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          管理您的所有 SAP 系统连接，支持添加、编辑、删除、复制连接，所有凭证本地加密存储。
+        </p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(34,197,94,0.1); color: #22C55E;">➕</div>
+            <div class="text">
+              <strong>新建连接</strong>
+              <p>点击右上角「新建」按钮，填写连接名称、系统标识、客户端、用户名等信息</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(6,182,212,0.1); color: #06B6D4;">✏️</div>
+            <div class="text">
+              <strong>编辑连接</strong>
+              <p>点击卡片上的编辑图标或右键菜单选择「编辑」修改连接信息</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(139,92,246,0.1); color: #8B5CF6;">📋</div>
+            <div class="text">
+              <strong>复制连接</strong>
+              <p>右键菜单选择「复制连接」，快速创建相似配置的新连接</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(239,68,68,0.1); color: #EF4444;">🗑️</div>
+            <div class="text">
+              <strong>删除连接</strong>
+              <p>点击删除图标或右键菜单选择「删除」，删除前会弹出确认对话框</p>
+            </div>
+          </div>
+        </div>
+        <div class="tip-box success">
+          <span class="tip-icon">🔒</span>
+          <div class="tip-text">
+            <strong>数据安全：</strong>所有连接信息（包括密码）均存储在本地 JSON 文件中，不会上传到任何服务器。关闭应用时数据自动保存。
+          </div>
+        </div>
+      </div>
+
+      <!-- 启动连接 -->
+      <div class="doc-section reveal" id="launch">
+        <div class="section-icon purple">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          启动连接
+          <a href="#launch" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          多种方式快速启动 SAP 连接，告别繁琐的手动登录流程。
+        </p>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">🎯</div>
+            <div class="step-content">
+              <strong>点击启动按钮</strong>
+              <p>点击卡片上的环境色渐变启动按钮，按钮颜色对应不同环境（红=生产，琥珀=测试，绿=开发）</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">🖱️</div>
+            <div class="step-content">
+              <strong>双击卡片启动</strong>
+              <p>双击卡片任意位置即可启动连接，无需精确点击启动按钮</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">⚡</div>
+            <div class="step-content">
+              <strong>批量启动</strong>
+              <p>进入批量模式（点击左下角选择框），选中多个连接后点击「批量启动」</p>
+            </div>
+          </div>
+        </div>
+        <div class="tip-box info">
+          <span class="tip-icon">💡</span>
+          <div class="tip-text">
+            <strong>启动进度：</strong>点击启动后，按钮会显示进度动画，约 1 秒后 SAP GUI 自动打开并登录。启动过程中不会重复触发。
+          </div>
+        </div>
+      </div>
+
+      <!-- 环境区分 -->
+      <div class="doc-section reveal" id="env">
+        <div class="section-icon red">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          环境区分
+          <a href="#env" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          每个连接都有一个环境属性（生产/测试/开发），通过颜色、图标和边框快速区分不同环境，避免误操作。
+        </p>
+        <div class="two-col">
+          <div class="col-card">
+            <h4><span class="env-tag prd">🛡️ 生产 PRD</span></h4>
+            <ul>
+              <li>启动按钮：红色→橙色渐变</li>
+              <li>卡片左边框：红色 4px 实线</li>
+              <li>环境图标：盾牌警告 ShieldWarning</li>
+              <li>用途：正式生产环境，需谨慎操作</li>
+            </ul>
+          </div>
+          <div class="col-card">
+            <h4><span class="env-tag qas">🧪 测试 QAS</span></h4>
+            <ul>
+              <li>启动按钮：琥珀色→黄色渐变</li>
+              <li>卡片左边框：琥珀色 4px 实线</li>
+              <li>环境图标：烧瓶 Flask</li>
+              <li>用途：质量保证测试环境</li>
+            </ul>
+          </div>
+          <div class="col-card">
+            <h4><span class="env-tag dev">💻 开发 DEV</span></h4>
+            <ul>
+              <li>启动按钮：翠绿色→青色渐变</li>
+              <li>卡片左边框：绿色 4px 实线</li>
+              <li>环境图标：代码 Code</li>
+              <li>用途：开发调试环境</li>
+            </ul>
+          </div>
+          <div class="col-card">
+            <h4>✨ 视觉效果</h4>
+            <ul>
+              <li>鼠标悬停时显示玻璃镜片反光效果</li>
+              <li>环境色左边框在悬停时保持不变</li>
+              <li>启动按钮悬停时有环境色阴影</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分组管理 -->
+      <div class="doc-section reveal" id="group">
+        <div class="section-icon blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          分组管理
+          <a href="#group" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          通过分组将连接按项目、客户或用途分类整理，保持列表整洁有序。
+        </p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(59,130,246,0.1); color: #3B82F6;">📂</div>
+            <div class="text">
+              <strong>新建分组</strong>
+              <p>点击「分组管理」按钮 → 输入分组名称 → 创建</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(59,130,246,0.1); color: #3B82F6;">🔄</div>
+            <div class="text">
+              <strong>移动到分组</strong>
+              <p>右键连接 → 选择目标分组，或拖拽卡片到目标分组</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(59,130,246,0.1); color: #3B82F6;">📝</div>
+            <div class="text">
+              <strong>重命名/删除</strong>
+              <p>在分组管理中重命名或删除分组，删除后组内连接移至「未分组」</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(59,130,246,0.1); color: #3B82F6;">🔽</div>
+            <div class="text">
+              <strong>折叠/展开</strong>
+              <p>点击分组标题可折叠或展开该分组下的连接列表</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 固定卡片 -->
+      <div class="doc-section reveal" id="pin">
+        <div class="section-icon amber">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+            <path d="M12 17v5M9 3h6l-1 7h3l-5 7-5-7h3z"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          固定卡片
+          <a href="#pin" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          将常用的连接固定在「最近使用」区域，不受使用频次和时间的影响，始终快速可达。
+        </p>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">📌</div>
+            <div class="step-content">
+              <strong>固定连接</strong>
+              <p>右键点击卡片 → 选择「固定」，卡片将显示 📌 已固定标记（青色），并始终排在最近使用区域最前面</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">🔓</div>
+            <div class="step-content">
+              <strong>取消固定</strong>
+              <p>右键已固定的卡片 → 选择「取消固定」，卡片恢复为普通的最近使用排序</p>
+            </div>
+          </div>
+        </div>
+        <div class="tip-box warning">
+          <span class="tip-icon">⚠️</span>
+          <div class="tip-text">
+            <strong>注意：</strong>最近使用区域最多显示 5 张卡片。固定卡片优先占位，剩余位置由最近使用的非固定卡片填充。已固定的卡片不再显示「最近」标记。
+          </div>
+        </div>
+      </div>
+
+      <!-- 快捷键 -->
+      <div class="doc-section reveal" id="shortcut">
+        <div class="section-icon orange">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M6 16h.01M10 16h.01M14 16h.01M18 16h.01"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          快捷键
+          <a href="#shortcut" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          全局快捷键让你无需切换窗口即可呼出应用，保持工作流连贯。
+        </p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(249,115,22,0.1); color: #F97316;">⌨️</div>
+            <div class="text">
+              <strong>全局呼出 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd></strong>
+              <p>随时呼出或隐藏应用窗口，无需在任务栏中查找</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(249,115,22,0.1); color: #F97316;">🔍</div>
+            <div class="text">
+              <strong>搜索过滤</strong>
+              <p>在搜索栏中输入关键词，按名称、系统 ID、用户名等多维度快速定位连接</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(249,115,22,0.1); color: #F97316;">🏠</div>
+            <div class="text">
+              <strong>系统托盘</strong>
+              <p>关闭窗口后应用最小化到系统托盘，继续监听全局快捷键</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(249,115,22,0.1); color: #F97316;">🔒</div>
+            <div class="text">
+              <strong>单实例模式</strong>
+              <p>只允许运行一个实例，重复启动时自动呼出已有窗口</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主题与语言 -->
+      <div class="doc-section reveal" id="theme">
+        <div class="section-icon pink">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EC4899" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          主题与语言
+          <a href="#theme" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          支持深色/浅色主题和 8 种主题色，中英文界面一键切换。
+        </p>
+        <div class="two-col">
+          <div class="col-card">
+            <h4>🌙 深色 / ☀️ 浅色</h4>
+            <ul>
+              <li>点击标题栏的主题切换按钮在深色和浅色间切换</li>
+              <li>深色主题：暗黑背景 + 柔和卡片</li>
+              <li>浅色主题：白色卡片 + 清爽界面</li>
+              <li>环境色左边框在两种主题下均可清晰辨认</li>
+            </ul>
+          </div>
+          <div class="col-card">
+            <h4>🌐 中 / 英文</h4>
+            <ul>
+              <li>在设置中切换中文和英文界面</li>
+              <li>所有界面文字、提示、标签均支持双语</li>
+              <li>包括「最近」「已固定」等卡片标签</li>
+              <li>切换后即时生效，无需重启</li>
+            </ul>
+          </div>
+        </div>
+        <div class="feature-list" style="margin-top: 1.5rem;">
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(236,72,153,0.1); color: #EC4899;">🎨</div>
+            <div class="text">
+              <strong>8 种主题色</strong>
+              <p>翠绿、青蓝、靛紫、玫红、琥珀、橙色、石板、锌灰，还支持自定义主题色</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(236,72,153,0.1); color: #EC4899;">✨</div>
+            <div class="text">
+              <strong>玻璃反光效果</strong>
+              <p>鼠标悬停卡片时，三层反光效果（主高光、对角线反光条、中心微光）营造玻璃镜片质感</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 导入导出 -->
+      <div class="doc-section reveal" id="import-export">
+        <div class="section-icon cyan">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+            <path d="M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          导入与导出
+          <a href="#import-export" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          通过 JSON 文件导入导出连接配置，方便备份迁移和多设备同步。
+        </p>
+        <div class="two-col">
+          <div class="col-card">
+            <h4>📤 导出</h4>
+            <ul>
+              <li>点击右上角「导出」按钮</li>
+              <li>选择保存位置，导出为 JSON 文件</li>
+              <li>包含所有连接、分组信息</li>
+              <li>可作为备份或分享给同事</li>
+            </ul>
+          </div>
+          <div class="col-card">
+            <h4>📥 导入</h4>
+            <ul>
+              <li>点击右上角「导入」按钮</li>
+              <li>选择之前导出的 JSON 文件</li>
+              <li>自动合并或覆盖现有连接</li>
+              <li>适合换电脑或重装系统后恢复</li>
+            </ul>
+          </div>
+        </div>
+        <div class="tip-box warning">
+          <span class="tip-icon">⚠️</span>
+          <div class="tip-text">
+            <strong>隐私提醒：</strong>导出的 JSON 文件包含用户名和密码等敏感信息，请妥善保管，不要发送给不信任的人。
+          </div>
+        </div>
+      </div>
+
+      <!-- 拖拽排序 -->
+      <div class="doc-section reveal" id="drag-sort">
+        <div class="section-icon green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2">
+            <polyline points="5 9 2 12 5 15"/>
+            <polyline points="9 5 12 2 15 5"/>
+            <polyline points="15 19 12 22 9 19"/>
+            <polyline points="19 9 22 12 19 15"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <line x1="12" y1="2" x2="12" y2="22"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          拖拽排序
+          <a href="#drag-sort" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          通过拖拽自由调整连接在列表中的顺序，按照你的习惯排列卡片。
+        </p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(34,197,94,0.1); color: #22C55E;">↕️</div>
+            <div class="text">
+              <strong>拖拽卡片</strong>
+              <p>长按卡片后上下拖拽，松开即可调整位置</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="icon" style="background: rgba(34,197,94,0.1); color: #22C55E;">🔄</div>
+            <div class="text">
+              <strong>跨分组拖拽</strong>
+              <p>拖拽卡片到不同分组，快速改变连接所属分组</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 新手引导 -->
+      <div class="doc-section reveal" id="onboarding">
+        <div class="section-icon purple">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4M12 8h.01"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          新手引导
+          <a href="#onboarding" class="anchor">#</a>
+        </h2>
+        <p class="section-desc">
+          首次打开应用时，会自动播放 6 步新手引导，快速了解核心功能。
+        </p>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <strong>搜索栏</strong>
+              <p>了解如何通过关键词快速搜索和过滤连接</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <strong>新建连接</strong>
+              <p>点击新建按钮添加第一个 SAP 连接</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <strong>连接卡片</strong>
+              <p>了解卡片上的环境标签、信息网格和操作按钮</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <strong>启动按钮</strong>
+              <p>一键启动 SAP 连接，体验极速登录</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <strong>设置面板</strong>
+              <p>主题、语言、主题色等个性化配置</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">6</div>
+            <div class="step-content">
+              <strong>SAP 路径</strong>
+              <p>配置 sapshcut.exe 路径，确保启动功能正常工作</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 常见问题 -->
+      <div class="doc-section reveal" id="faq">
+        <div class="section-icon orange">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <h2 class="section-title">
+          常见问题
+          <a href="#faq" class="anchor">#</a>
+        </h2>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">Q</div>
+            <div class="step-content">
+              <strong>启动时提示「路径无效」怎么办？</strong>
+              <p>请在设置中重新配置 SAP 路径，确保指向正确的 <code>sapshcut.exe</code> 文件。路径示例：<code>C:\Program Files (x86)\SAP\FrontEnd\SAPGUI\sapshcut.exe</code></p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">Q</div>
+            <div class="step-content">
+              <strong>全局快捷键不起作用？</strong>
+              <p>确认应用已启动并在系统托盘运行。部分安全软件可能会拦截全局快捷键，请将本应用加入白名单。</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">Q</div>
+            <div class="step-content">
+              <strong>数据存储在哪里？</strong>
+              <p>所有数据存储在本地 JSON 文件中（位于用户 AppData 目录），不会上传到任何服务器。可通过导出功能备份。</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">Q</div>
+            <div class="step-content">
+              <strong>如何迁移数据到新电脑？</strong>
+              <p>在原电脑上导出 JSON 文件，在新电脑上安装应用后导入即可，所有连接和分组信息完整保留。</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">Q</div>
+            <div class="step-content">
+              <strong>支持 macOS 或 Linux 吗？</strong>
+              <p>目前仅支持 Windows 平台，因为 SAP GUI（sapshcut.exe）仅提供 Windows 版本。</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">Q</div>
+            <div class="step-content">
+              <strong>密码安全吗？</strong>
+              <p>密码存储在本地配置文件中。建议通过导出功能定期备份，并妥善保管导出文件。如需更高安全性，可在 SAP 系统端启用 SSO 单点登录。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-text">
+        © 2026 SAP Quick Launcher. All rights reserved.
+      </div>
+      <div class="footer-links">
+        <a href="index.html">首页</a>
+        <a href="#">使用条款</a>
+        <a href="#">隐私政策</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 自定义光标
+    const cursor = document.getElementById('cursor');
+    const cursorDot = document.getElementById('cursor-dot');
+    let mouseX = 0, mouseY = 0;
+    let cursorX = 0, cursorY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.left = mouseX - 3 + 'px';
+      cursorDot.style.top = mouseY - 3 + 'px';
+    });
+
+    function animateCursor() {
+      cursorX += (mouseX - cursorX) * 0.15;
+      cursorY += (mouseY - cursorY) * 0.15;
+      cursor.style.left = cursorX - 10 + 'px';
+      cursor.style.top = cursorY - 10 + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // 悬停效果
+    document.querySelectorAll('a, button, .btn').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+
+    // 滚动显示动画
+    const reveals = document.querySelectorAll('.reveal');
+
+    function checkReveal() {
+      reveals.forEach(el => {
+        const top = el.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
+
+        if (top < windowHeight - 100) {
+          el.classList.add('visible');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', checkReveal);
+    checkReveal();
+  </script>
+</body>
+</html>

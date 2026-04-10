@@ -7,7 +7,7 @@ export const translations: Record<'zh' | 'en', Translations> = {
     buttons: { shortcut: '快捷方式', import: '导入', export: '导出', add: '新建' },
     env: { prd: '生产', qas: '测试', dev: '开发' },
     fields: { client: '客户端', user: '用户', lang: '语言', pwd: '密码' },
-    actions: { edit: '编辑', delete: '删除', launch: '启动', copy: '复制', duplicate: '复制连接' },
+    actions: { edit: '编辑', delete: '删除', launch: '启动', copy: '复制', duplicate: '复制连接', pin: '固定', unpin: '取消固定' },
     modal: { new: '新建连接', edit: '编辑连接', save: '保存', cancel: '取消', create: '创建' },
     confirm: { title: '删除连接', message: '确定要删除「{name}」吗？', confirm: '删除', deleteGroup: '确定删除此分组吗？分组内的连接将移至未分组。' },
     empty: { title: '暂无连接', desc: '点击右上角按钮创建连接' },
@@ -21,7 +21,9 @@ export const translations: Record<'zh' | 'en', Translations> = {
       groupCreated: '分组已创建',
       groupDeleted: '分组已删除',
       batchLaunched: '已批量启动 {count} 个连接',
-      batchDeleted: '已批量删除 {count} 个连接'
+      batchDeleted: '已批量删除 {count} 个连接',
+      pinned: '已固定',
+      unpinned: '已取消固定'
     },
     footer: '快捷键',
     shortcut: '呼出',
@@ -32,7 +34,7 @@ export const translations: Record<'zh' | 'en', Translations> = {
     tooltip: { settings: '设置', pathConfig: '配置 SAP 路径', import: '导入连接', export: '导出连接', lightTheme: '浅色主题', darkTheme: '深色主题', add: '新建连接' },
     group: { title: '分组管理', new: '新建分组', rename: '重命名', delete: '删除', noGroup: '未分组', expand: '展开', collapse: '折叠' },
     batch: { selectAll: '全选', deselectAll: '取消全选', launch: '批量启动', delete: '批量删除', selected: '已选择 {count} 项' },
-    recent: { title: '最近使用', frequently: '经常使用', clear: '清空记录' },
+    recent: { title: '最近使用', frequently: '经常使用', clear: '清空记录', tag: '最近', pinnedTag: '已固定' },
   },
   en: {
     title: 'SAP Quick Launcher',
@@ -40,7 +42,7 @@ export const translations: Record<'zh' | 'en', Translations> = {
     buttons: { shortcut: 'Shortcut', import: 'Import', export: 'Export', add: 'NEW' },
     env: { prd: 'PRD', qas: 'QAS', dev: 'DEV' },
     fields: { client: 'Client', user: 'User', lang: 'Lang', pwd: 'Password' },
-    actions: { edit: 'Edit', delete: 'Delete', launch: 'LAUNCH', copy: 'Copy', duplicate: 'Duplicate' },
+    actions: { edit: 'Edit', delete: 'Delete', launch: 'LAUNCH', copy: 'Copy', duplicate: 'Duplicate', pin: 'Pin', unpin: 'Unpin' },
     modal: { new: 'New Connection', edit: 'Edit Connection', save: 'Save', cancel: 'Cancel', create: 'Create' },
     confirm: { title: 'Delete Connection', message: 'Delete "{name}"?', confirm: 'Delete', deleteGroup: 'Delete this group? Connections inside will be moved to Ungrouped.' },
     empty: { title: 'No Connections', desc: 'Click button to create connection' },
@@ -54,7 +56,9 @@ export const translations: Record<'zh' | 'en', Translations> = {
       groupCreated: 'Group created',
       groupDeleted: 'Group deleted',
       batchLaunched: 'Launched {count} connections',
-      batchDeleted: 'Deleted {count} connections'
+      batchDeleted: 'Deleted {count} connections',
+      pinned: 'Pinned',
+      unpinned: 'Unpinned'
     },
     footer: 'HOTKEY',
     shortcut: 'Show',
@@ -65,6 +69,6 @@ export const translations: Record<'zh' | 'en', Translations> = {
     tooltip: { settings: 'Settings', pathConfig: 'Configure SAP Path', import: 'Import Connections', export: 'Export Connections', lightTheme: 'Light Theme', darkTheme: 'Dark Theme', add: 'New Connection' },
     group: { title: 'Groups', new: 'New Group', rename: 'Rename', delete: 'Delete', noGroup: 'Ungrouped', expand: 'Expand', collapse: 'Collapse' },
     batch: { selectAll: 'Select All', deselectAll: 'Deselect All', launch: 'Batch Launch', delete: 'Batch Delete', selected: '{count} selected' },
-    recent: { title: 'Recent', frequently: 'Frequently Used', clear: 'Clear History' },
+    recent: { title: 'Recent', frequently: 'Frequently Used', clear: 'Clear History', tag: 'Recent', pinnedTag: 'Pinned' },
   }
 };

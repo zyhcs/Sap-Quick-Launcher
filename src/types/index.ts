@@ -12,6 +12,7 @@ export interface Connection {
   order: number;           // 排序顺序
   lastUsed?: number;      // 最后使用时间戳
   useCount?: number;      // 使用次数
+  pinned?: boolean;       // 是否固定
 }
 
 export interface Group {
@@ -57,6 +58,8 @@ export interface Translations {
     launch: string;
     copy: string;
     duplicate: string;
+    pin: string;
+    unpin: string;
   };
   modal: {
     new: string;
@@ -86,6 +89,8 @@ export interface Translations {
     groupDeleted: string;
     batchLaunched: string;
     batchDeleted: string;
+    pinned: string;
+    unpinned: string;
   };
   footer: string;
   shortcut: string;
@@ -137,5 +142,7 @@ export interface Translations {
     title: string;
     frequently: string;
     clear: string;
+    tag: string;
+    pinnedTag: string;
   };
 }

@@ -354,6 +354,14 @@ body {
 }
 
 /* === 环境标签 - 现代胶囊样式 === */
+.env-card-border {
+  border-left: 4px solid var(--env-border-color, var(--border-default));
+}
+.env-card-border:hover,
+.soft-card.env-card-border:hover {
+  border-left-color: var(--env-border-color, var(--border-default));
+}
+
 .env-tag {
   display: inline-flex;
   align-items: center;

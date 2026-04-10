@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Connection, Translations, Theme } from '../types';
-import { PencilSimple, Trash, Rocket, CheckSquare, Square } from '@phosphor-icons/react';
+import { PencilSimple, Trash, Rocket, CheckSquare, Square, ShieldWarning, Flask, Code, PushPin } from '@phosphor-icons/react';
 import Tooltip from './Tooltip';
 
 interface ConnectionCardProps {
@@ -39,25 +39,40 @@ export default function ConnectionCard({
 
   const isDark = theme === 'dark';
 
-  // 环境对应的颜色
+  // 环境对应的颜色与图标
   const envStyles = {
     prd: { 
       gradient: 'from-red-500/20 to-orange-500/10',
       border: 'border-red-500/20',
       glow: 'rgba(239, 68, 68, 0.15)',
       text: 'text-red-400',
+      btnGradient: 'from-red-500 to-orange-400',
+      btnShadow: 'rgba(239, 68, 68, 0.25)',
+      btnShadowHover: 'rgba(239, 68, 68, 0.35)',
+      leftBorder: '#EF4444',
+      icon: ShieldWarning,
     },
     qas: { 
       gradient: 'from-amber-500/20 to-yellow-500/10',
       border: 'border-amber-500/20',
       glow: 'rgba(245, 158, 11, 0.15)',
       text: 'text-amber-400',
+      btnGradient: 'from-amber-500 to-yellow-400',
+      btnShadow: 'rgba(245, 158, 11, 0.25)',
+      btnShadowHover: 'rgba(245, 158, 11, 0.35)',
+      leftBorder: '#F59E0B',
+      icon: Flask,
     },
     dev: { 
       gradient: 'from-emerald-500/20 to-green-500/10',
       border: 'border-emerald-500/20',
       glow: 'rgba(34, 197, 94, 0.15)',
       text: 'text-emerald-400',
+      btnGradient: 'from-emerald-500 to-teal-400',
+      btnShadow: 'rgba(34, 197, 94, 0.25)',
+      btnShadowHover: 'rgba(34, 197, 94, 0.35)',
+      leftBorder: '#22C55E',
+      icon: Code,
     },
   };
 
@@ -104,27 +119,76 @@ export default function ConnectionCard({
         animationDelay: `${index * 50}ms`,
         '--mouse-x': `${mousePos.x}%`,
         '--mouse-y': `${mousePos.y}%`,
+        '--env-border-color': env.leftBorder,
       } as React.CSSProperties}
       className={`
         group relative overflow-hidden
         soft-card p-5 animate-slide-up
+        env-card-border
         ${isSelected ? 'ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--bg-primary)]' : ''}
         ${isLaunching ? 'scale-[1.01]' : ''}
         cursor-pointer
       `}
       onContextMenu={onContextMenu}
+      onDoubleClick={() => { if (!isLaunching) handleLaunch(); }}
     >
       {/* 环境渐变背景 */}
       <div className={`absolute inset-0 bg-gradient-to-br ${env.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
       
-      {/* 鼠标跟随光效 */}
+      {/* 玻璃镜片反光 - 跟随鼠标的椭圆高光 */}
       <div 
-        className="absolute w-48 h-48 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         style={{
           left: `${mousePos.x}%`,
           top: `${mousePos.y}%`,
           transform: 'translate(-50%, -50%)',
-          background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+          width: '260px',
+          height: '260px',
+          borderRadius: '50%',
+          background: `radial-gradient(ellipse at center, 
+            rgba(255,255,255,0.12) 0%, 
+            rgba(255,255,255,0.06) 25%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 70%)`,
+          filter: 'blur(2px)',
+        }}
+      />
+
+      {/* 玻璃镜片反光 - 对角线高光条纹 */}
+      <div 
+        className="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+        style={{
+          top: '-50%',
+          left: `${mousePos.x - 30}%`,
+          width: '60%',
+          height: '200%',
+          transform: 'rotate(25deg)',
+          background: `linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(255,255,255,0.03) 30%, 
+            rgba(255,255,255,0.07) 48%, 
+            rgba(255,255,255,0.1) 50%, 
+            rgba(255,255,255,0.07) 52%, 
+            rgba(255,255,255,0.03) 70%, 
+            transparent 100%)`,
+          filter: 'blur(1px)',
+        }}
+      />
+
+      {/* 玻璃镜片反光 - 边缘散射微光 */}
+      <div 
+        className="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-400"
+        style={{
+          left: `${mousePos.x}%`,
+          top: `${mousePos.y}%`,
+          transform: 'translate(-50%, -50%)',
+          width: '120px',
+          height: '120px',
+          borderRadius: '50%',
+          background: `radial-gradient(circle, 
+            rgba(255,255,255,0.18) 0%, 
+            rgba(255,255,255,0.04) 40%, 
+            transparent 70%)`,
         }}
       />
 
@@ -152,10 +216,18 @@ export default function ConnectionCard({
             )}
 
             {/* 最近使用标记 */}
-            {isRecent && (
+            {isRecent && !conn.pinned && (
               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--primary-dim)]">
                 <Rocket size={10} className="text-[var(--primary)]" weight="fill" />
-                <span className="text-[9px] font-bold text-[var(--primary)] uppercase tracking-wide">Recent</span>
+                <span className="text-[9px] font-bold text-[var(--primary)] uppercase tracking-wide">{t.recent.tag}</span>
+              </div>
+            )}
+
+            {/* 固定标记 */}
+            {conn.pinned && (
+              <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full ${isDark ? 'bg-cyan-400/15' : 'bg-cyan-50'}`}>
+                <PushPin size={10} className="text-cyan-400" weight="fill" />
+                <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-wide">{t.recent.pinnedTag}</span>
               </div>
             )}
 
@@ -172,6 +244,7 @@ export default function ConnectionCard({
 
           {/* 环境标签 */}
           <div className={`env-tag ${conn.env === 'prd' ? 'env-prd' : conn.env === 'qas' ? 'env-qas' : 'env-dev'}`}>
+            <env.icon size={12} weight="fill" />
             {conn.env === 'prd' ? t.env.prd : conn.env === 'qas' ? t.env.qas : t.env.dev}
           </div>
         </div>
@@ -244,14 +317,26 @@ export default function ConnectionCard({
               className={`
                 relative px-6 py-2.5 rounded-xl text-sm font-bold
                 transition-all duration-300 flex items-center gap-2
-                bg-gradient-to-r from-[var(--primary)] to-emerald-400
-                text-white shadow-lg shadow-[var(--primary)]/20
-                hover:shadow-xl hover:shadow-[var(--primary)]/30
+                bg-gradient-to-r ${env.btnGradient}
+                text-white
                 ${isLaunching 
                   ? 'opacity-90 cursor-wait' 
                   : 'hover:-translate-y-0.5 hover:scale-[1.02] active:scale-[0.98]'
                 }
               `}
+              style={{
+                boxShadow: isLaunching 
+                  ? `0 10px 25px -5px ${env.btnShadow}`
+                  : `0 10px 15px -3px ${env.btnShadow}, 0 4px 6px -4px ${env.btnShadow}`,
+              }}
+              onMouseEnter={(e) => {
+                if (!isLaunching) {
+                  e.currentTarget.style.boxShadow = `0 20px 25px -5px ${env.btnShadowHover}, 0 8px 10px -6px ${env.btnShadow}`;
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = `0 10px 15px -3px ${env.btnShadow}, 0 4px 6px -4px ${env.btnShadow}`;
+              }}
             >
               {/* 启动进度环 */}
               {isLaunching && (
